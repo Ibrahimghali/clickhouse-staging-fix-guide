@@ -1,0 +1,37 @@
+---
+- name: Heal ClickHouse Split-Brain Replication
+  hosts: clickhouse_servers
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Fetch list of broken tables from ch02
+      shell: >
+        docker exec ch02 clickhouse-client --password '{{ ch_password }}'
+        -q "SELECT database, table FROM system.replicas WHERE database LIKE 'reporting_shop%' AND is_readonly = 1 AND table NOT LIKE '%_backup' FORMAT CSV"
+        | tr -d '\"' | tr -d '\r'
+      register: broken_tables_output
+      changed_when: false
+
+    - name: Display tables slated for recovery
+      debug:
+        msg: "Found {{ broken_tables_output.stdout_lines | length }} broken tables to fix."
+
+    - name: Execute Safe Fix loop for each broken table
+      shell: |
+        DB=$(echo "{{ item }}" | cut -d',' -f1)
+        TBL=$(echo "{{ item }}" | cut -d',' -f2)
+
+        echo "Starting recovery for $DB.$TBL..."
+
+        docker exec ch02 clickhouse-client --password '{{ ch_password }}' -q "RENAME TABLE $DB.$TBL TO $DB.${TBL}_backup;"
+        docker exec ch01 clickhouse-client --password '{{ ch_password }}' -q "DROP TABLE IF EXISTS $DB.$TBL;"
+        docker exec ch02 clickhouse-client --password '{{ ch_password }}' -q "CREATE TABLE $DB.$TBL ON CLUSTER staging_cluster AS $DB.${TBL}_backup;"
+        docker exec ch02 clickhouse-client --password '{{ ch_password }}' -q "INSERT INTO $DB.$TBL SELECT * FROM $DB.${TBL}_backup;"
+        docker exec ch02 clickhouse-client --password '{{ ch_password }}' -q "DROP TABLE $DB.${TBL}_backup;"
+      loop: "{{ broken_tables_output.stdout_lines }}"
+      when: item | trim != ''
+      register: fix_results
+    - name: Recovery Summary
+      debug:
+        msg: "Successfully healed {{ fix_results.results | selectattr('changed', 'equalto', true) | list | length }} tables across the cluster!"
