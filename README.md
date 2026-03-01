@@ -134,11 +134,19 @@ Les captures d'écran suivantes démontrent la réussite de la récupération :
 
 #### État Initial du Cluster
 
+![État Initial du Cluster](assets/image.png)
+
 #### Vérification UUID - Résultat Vide (Succès)
+
+![Vérification UUID - Résultat Vide](assets/Screenshot%202026-02-28%20164020.png)
 
 #### Synchronisation des Données ch01
 
+![Synchronisation des Données ch01](assets/Screenshot%202026-02-28%20164056.png)
+
 #### Synchronisation des Données ch02
+
+![Synchronisation des Données ch02](assets/Screenshot%202026-02-28%20164258.png)
 
 ---
 
