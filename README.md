@@ -113,6 +113,22 @@ GROUP BY database;
 
 **Résultat attendu :** ~91.5M lignes synchronisées.
 
+### 6.3 Preuves Visuelles
+
+Les captures d'écran suivantes démontrent la réussite de la récupération :
+
+#### État Initial du Cluster
+![État du cluster avant réparation](assets/image.png)
+
+#### Vérification UUID - Résultat Vide (Succès)
+![Alignement des UUID - 0 lignes retournées](assets/Screenshot%202026-02-28%20164020.png)
+
+#### Synchronisation des Données ch01
+![Données synchronisées sur ch01](assets/Screenshot%202026-02-28%20164056.png)
+
+#### Synchronisation des Données ch02
+![Données synchronisées sur ch02](assets/Screenshot%202026-02-28%20164258.png)
+
 ---
 
 ## 7. Structure du Projet
@@ -130,8 +146,5 @@ GROUP BY database;
 │   ├── BUG_DESCRIPTION.md # Détails techniques du bug
 │   └── GUIDE.md           # Guide d'intervention pas-à-pas
 └── assets               # Captures d'écran et schémas
-
-```
-
 ```
 
